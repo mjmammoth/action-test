@@ -80,4 +80,4 @@ jobs:
           echo "Bumped version to $VERSION"
 
       - name: Push version commit & tags
-        run: git push --tags
+        run: git push --follow-tags
