@@ -51,7 +51,7 @@ jobs:
         run: poetry install
 
       - name: Determine version bump type
-        id: determine_version'
+        id: determine_version
         run: |
           VERSION_BUMP=patch
           BASE_COMMIT=$(git merge-base HEAD origin/main)
