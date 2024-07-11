@@ -56,7 +56,7 @@ jobs:
           restore-keys: ${{ runner.os }}-poetry-
 
       - name: Install dependencies
-        run: poetry install --extras "production"
+        run: poetry install
 
       # - name: Run tests
       #   run: poetry run pytest
@@ -165,7 +165,7 @@ jobs:
         run: sudo apt-get install graphviz graphviz-dev libpq-dev -y
 
       - name: Install dependencies
-        run: poetry install --extras "production"
+        run: poetry install
 
       - name: Authenticate to GCP
         id: google-auth
