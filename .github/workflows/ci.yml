@@ -67,6 +67,9 @@ jobs:
   bump-version:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      contents: 'write'
+      id-token: 'write'
     needs: version-matrix
     strategy:
       matrix:
