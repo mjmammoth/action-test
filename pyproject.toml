@@ -27,8 +27,8 @@ parse = """(?x)
     )?                                # pre-release section is optional
 """
 serialize = [
-    "{major}.{minor}.{patch}-{pre_l}",
-    "{major}.{minor}.{patch}"
+    "v{major}.{minor}.{patch}-{pre_l}",
+    "v{major}.{minor}.{patch}"
 ]
 search = "{current_version}"
 replace = "{new_version}"
@@ -36,7 +36,7 @@ regex = false
 ignore_missing_version = false
 tag = true
 sign_tags = false
-tag_name = "v{new_version}"
+tag_name = "{new_version}"
 tag_message = "Bump version: {new_version}"
 allow_dirty = true
 commit = true
