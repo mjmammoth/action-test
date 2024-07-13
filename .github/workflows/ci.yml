@@ -78,13 +78,13 @@ jobs:
         python-version: ${{ fromJSON(needs.version-matrix.outputs.python-versions) }}
         poetry-version: ${{ fromJSON(needs.version-matrix.outputs.poetry-versions) }}
     steps:
-      - name: 👤 Authenticaticate With GitHub App
-        id: generate-token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ vars.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PEM }}
-
+      # - name: 👤 Authenticaticate With GitHub App
+      #   id: generate-token
+      #   uses: actions/create-github-app-token@v1
+      #   with:
+      #     app-id: ${{ vars.GH_APP_ID }}
+      #     private-key: ${{ secrets.GH_APP_PEM }}
+      #
       - name: Checkout code
         uses: actions/checkout@v4
         with:
