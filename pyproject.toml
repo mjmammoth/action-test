@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "action-test"
-version = "0.1.8-dev"
+version = "v0.1.9-dev"
 description = ""
 authors = ["Mark Marryatt <awsumtoast@gmail.com>"]
 readme = "README.md"
