@@ -65,7 +65,7 @@ jobs:
         run: poetry build
 
   bump-version:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.actor != 'actions-user'
     runs-on: ubuntu-latest
     permissions:
       contents: 'write'
