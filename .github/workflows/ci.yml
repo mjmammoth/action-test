@@ -181,22 +181,22 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
-      - name: Authenticate to GCP
-        id: google-auth
-        uses: google-github-actions/auth@v2
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-
-      - name: 'Set up Google Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v2'
-
-      - name: Publish to GCP PyPI Artifact Registry
-        run: |
-          poetry config repositories.google-acr https://${{ vars.GCP_ARTIFACT_REGISTRY_LOCATION }}-python.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REGISTRY_REPOSITORY }}/
-          poetry config http-basic.google-acr oauth2accesstoken $(gcloud auth print-access-token)
-          poetry publish --build --repository google-acr
+      # - name: Authenticate to GCP
+      #   id: google-auth
+      #   uses: google-github-actions/auth@v2
+      #   with:
+      #     project_id: ${{ secrets.GCP_PROJECT_ID }}
+      #     workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      #     service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      #
+      # - name: 'Set up Google Cloud SDK'
+      #   uses: 'google-github-actions/setup-gcloud@v2'
+      #
+      # - name: Publish to GCP PyPI Artifact Registry
+      #   run: |
+      #     poetry config repositories.google-acr https://${{ vars.GCP_ARTIFACT_REGISTRY_LOCATION }}-python.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REGISTRY_REPOSITORY }}/
+      #     poetry config http-basic.google-acr oauth2accesstoken $(gcloud auth print-access-token)
+      #     poetry publish --build --repository google-acr
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
