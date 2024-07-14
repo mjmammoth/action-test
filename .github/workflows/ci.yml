@@ -135,7 +135,7 @@ jobs:
         id: bump_version
         run: |
           git config --local user.email "csmark@github.com"
-          git config --local user.name "csmark-cicd-bot[bot]
+          git config --local user.name "csmark-cicd-bot[bot]"
           poetry run bump-my-version bump ${{ env.VERSION_BUMP }}
           VERSION=$(poetry version -s)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
