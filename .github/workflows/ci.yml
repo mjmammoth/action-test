@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - main
-      - 'refs/tags/*-dev'
+    tags:
+      - '*-dev'
   pull_request:
     branches:
       - main
