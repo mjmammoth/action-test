@@ -135,7 +135,7 @@ jobs:
         id: bump_version
         run: |
           git config --local user.email "csmark-cicd-bot[bot]"
-          git config --local user.name 944238+csmark-cicd-bot[bot]@users.noreply.github.com
+          git config --local user.name "csmark-cicd-bot[bot]@users.noreply.github.com"
           poetry run bump-my-version bump ${{ env.VERSION_BUMP }}
           VERSION=$(poetry version -s)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
@@ -181,6 +181,9 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
+      - name: Run build
+        run: poetry build
+
       # - name: Authenticate to GCP
       #   id: google-auth
       #   uses: google-github-actions/auth@v2
@@ -196,7 +199,7 @@ jobs:
       #   run: |
       #     poetry config repositories.google-acr https://${{ vars.GCP_ARTIFACT_REGISTRY_LOCATION }}-python.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REGISTRY_REPOSITORY }}/
       #     poetry config http-basic.google-acr oauth2accesstoken $(gcloud auth print-access-token)
-      #     poetry publish --build --repository google-acr
+      #     poetry publish --repository google-acr
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
