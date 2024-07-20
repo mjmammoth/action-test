@@ -227,36 +227,9 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           poetry version $VERSION
 
-      # - name: Cache Poetry packages
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: ~/.cache/pypoetry
-      #     key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
-      #     restore-keys: ${{ runner.os }}-poetry-
-      #
-      # - name: Install non-python dependencies
-      #   run: sudo apt-get install graphviz graphviz-dev libpq-dev -y
-      #
       - name: Install dependencies
         run: poetry install
-      #
-      # - name: Authenticate to GCP
-      #   id: google-auth
-      #   uses: google-github-actions/auth@v2
-      #   with:
-      #     project_id: ${{ secrets.GCP_PROJECT_ID }}
-      #     workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-      #     service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-      #
-      # - name: 'Set up Google Cloud SDK'
-      #   uses: 'google-github-actions/setup-gcloud@v2'
-      #
-      # - name: Publish to GCP PyPI Artifact Registry
-      #   run: |
-      #     poetry config repositories.google-acr https://${{ vars.GCP_ARTIFACT_REGISTRY_LOCATION }}-python.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REGISTRY_REPOSITORY }}/
-      #     poetry config http-basic.google-acr oauth2accesstoken $(gcloud auth print-access-token)
-      #     poetry publish --repository google-acr
-      #
+
       - name: Pull main branch and tag
         run: |
           git config --local user.name "objective-applications-cicd[bot]"
@@ -266,6 +239,7 @@ jobs:
           git pull origin main
           echo two
           cat pyproject.toml | grep current_version
+          sed -i "s/^version = .*/version = \"$VERSION\"/" pyproject.toml
           sed -i "s/^current_version = .*/current_version = \"$VERSION\"/" pyproject.toml
           echo three
           cat pyproject.toml | grep current_version
