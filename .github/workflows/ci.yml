@@ -270,13 +270,13 @@ jobs:
       #     poetry publish --repository google-acr
       #
       - name: Pull main branch and tag
-        poetry run bump-my-version bump patch
-        git pull origin main
-        git config --local user.name "objective-applications-cicd[bot]"
-        git config --local user.email "objective-applications-cicd[bot]@users.noreply.github.com"
-        sed -i "s/^version = .*/version = \"$VERSION\"/" pyproject.toml
-        sed -i "s/^current_version = .*/current_version = \"$VERSION\"/" pyproject.toml
-        git add pyproject.toml
-        git commit -m "Release version: $VERSION"
-        git push origin HEAD
-
+        run: |
+          poetry run bump-my-version bump patch
+          git pull origin main
+          git config --local user.name "objective-applications-cicd[bot]"
+          git config --local user.email "objective-applications-cicd[bot]@users.noreply.github.com"
+          sed -i "s/^version = .*/version = \"$VERSION\"/" pyproject.toml
+          sed -i "s/^current_version = .*/current_version = \"$VERSION\"/" pyproject.toml
+          git add pyproject.toml
+          git commit -m "Release version: $VERSION"
+          git push origin HEAD
