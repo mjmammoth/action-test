@@ -272,7 +272,7 @@ jobs:
       #
       - name: Pull main branch and tag
         run: |
-          poetry run bump-my-version bump patch
+          # poetry run bump-my-version bump patch
           git pull origin main
           git config --local user.name "objective-applications-cicd[bot]"
           git config --local user.email "objective-applications-cicd[bot]@users.noreply.github.com"
