@@ -28,12 +28,27 @@ jobs:
           echo 'poetry-versions=["1.8.3"]' >> $GITHUB_OUTPUT
 
   build-and-test:
+    if: github.actor != 'csmark-cicd-bot[bot]'
     runs-on: ubuntu-latest
     needs: version-matrix
     strategy:
       matrix:
         python-version: ${{ fromJSON(needs.version-matrix.outputs.python-versions) }}
         poetry-version: ${{ fromJSON(needs.version-matrix.outputs.poetry-versions) }}
+    # services:
+    #   postgres-vector:
+    #     image: pgvector/pgvector:16
+    #     env:
+    #       POSTGRES_DB: dev
+    #       POSTGRES_USER: dev
+    #       POSTGRES_PASSWORD: dev
+    #     ports:
+    #       - 5432:5432
+    #     options: >-
+    #       --health-cmd pg_isready
+    #       --health-interval 10s
+    #       --health-timeout 5s
+    #       --health-retries 5
 
     steps:
       - name: Checkout code
@@ -60,7 +75,9 @@ jobs:
         run: poetry install
 
       # - name: Run tests
-      #   run: poetry run pytest
+      #   run: |
+      #     cp .env.example .env
+      #     poetry run pytest
 
       - name: Run build
         run: poetry build
@@ -134,8 +151,8 @@ jobs:
       - name: Bump version
         id: bump_version
         run: |
-          git config --local user.email "csmark-cicd-bot[bot]"
-          git config --local user.name "csmark-cicd-bot[bot]@users.noreply.github.com"
+          git config --local user.name "csmark-cicd-bot[bot]"
+          git config --local user.email "csmark-cicd-bot[bot]@users.noreply.github.com"
           poetry run bump-my-version bump ${{ env.VERSION_BUMP }}
           VERSION=$(poetry version -s)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
@@ -145,44 +162,43 @@ jobs:
         run: |
           git push origin HEAD --tags
 
-  build-and-publish-dev:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && endsWith(github.ref, '-dev')
-    runs-on: ubuntu-latest
-    needs: version-matrix
-    strategy:
-      matrix:
-        python-version: ${{ fromJSON(needs.version-matrix.outputs.python-versions) }}
-        poetry-version: ${{ fromJSON(needs.version-matrix.outputs.poetry-versions) }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install Poetry
-        uses: abatilo/actions-poetry@v2
-        with:
-          poetry-version: ${{ matrix.poetry-version }}
-
-      - name: Cache Poetry packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pypoetry
-          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: ${{ runner.os }}-poetry-
-
-      - name: Install non-python dependencies
-        run: sudo apt-get install graphviz graphviz-dev libpq-dev -y
-
-      - name: Install dependencies
-        run: poetry install
-
-      - name: Run build
-        run: poetry build
+  # build-and-publish-dev:
+  #   if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && endsWith(github.ref, '-dev')
+  #   runs-on: ubuntu-latest
+  #   needs:
+  #     - version-matrix
+  #     - build-and-test
+  #   strategy:
+  #     matrix:
+  #       python-version: ${{ fromJSON(needs.version-matrix.outputs.python-versions) }}
+  #       poetry-version: ${{ fromJSON(needs.version-matrix.outputs.poetry-versions) }}
+  #
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+  #
+  #     - name: Install Poetry
+  #       uses: abatilo/actions-poetry@v2
+  #       with:
+  #         poetry-version: ${{ matrix.poetry-version }}
+  #
+  #     - name: Cache Poetry packages
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ~/.cache/pypoetry
+  #         key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+  #         restore-keys: ${{ runner.os }}-poetry-
+  #
+  #     - name: Install non-python dependencies
+  #       run: sudo apt-get install graphviz graphviz-dev libpq-dev -y
+  #
+  #     - name: Install dependencies
+  #       run: poetry install
 
       # - name: Authenticate to GCP
       #   id: google-auth
@@ -201,54 +217,66 @@ jobs:
       #     poetry config http-basic.google-acr oauth2accesstoken $(gcloud auth print-access-token)
       #     poetry publish --repository google-acr
 
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: package-artifact-${{ github.sha }}
-          path: dist/
-          retention-days: 90
-
-  retag-and-publish-release:
+  handle-release-publish:
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: package-artifact-${{ github.event.release.target_commitish }}
-          path: ./dist
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.12.3
+          python-version: ${{ matrix.python-version }}
 
       - name: Install Poetry
         uses: abatilo/actions-poetry@v2
         with:
-          poetry-version: 1.8.3
+          poetry-version: ${{ matrix.poetry-version }}
 
-      - name: Authenticate to GCP
-        id: google-auth
-        uses: google-github-actions/auth@v2
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-
-      - name: 'Set up Google Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v2'
-
-      - name: Retag artifact
+      - name: Set version to release
         run: |
-          VERSION=${{ github.event.release.tag_name }}
-          poetry config repositories.google-acr https://${{ vars.GCP_ARTIFACT_REGISTRY_LOCATION }}-python.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REGISTRY_REPOSITORY }}/
-          poetry config http-basic.google-acr oauth2accesstoken $(gcloud auth print-access-token)
-          poetry publish --build --repository google-acr --version $VERSION
+          VERSION=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')
+          poetry version $VERSION
 
-      - name: Upload Retagged Artifacts
-        uses: actions/upload-artifact@v4
+      - name: Cache Poetry packages
+        uses: actions/cache@v4
         with:
-          name: package-artifact-${{ github.event.release.tag_name }}
-          path: dist/
-          retention-days: 90
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: ${{ runner.os }}-poetry-
+
+      - name: Install non-python dependencies
+        run: sudo apt-get install graphviz graphviz-dev libpq-dev -y
+
+      - name: Install dependencies
+        run: poetry install
+
+      # - name: Authenticate to GCP
+      #   id: google-auth
+      #   uses: google-github-actions/auth@v2
+      #   with:
+      #     project_id: ${{ secrets.GCP_PROJECT_ID }}
+      #     workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      #     service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      #
+      # - name: 'Set up Google Cloud SDK'
+      #   uses: 'google-github-actions/setup-gcloud@v2'
+      #
+      # - name: Publish to GCP PyPI Artifact Registry
+      #   run: |
+      #     poetry config repositories.google-acr https://${{ vars.GCP_ARTIFACT_REGISTRY_LOCATION }}-python.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GCP_ARTIFACT_REGISTRY_REPOSITORY }}/
+      #     poetry config http-basic.google-acr oauth2accesstoken $(gcloud auth print-access-token)
+      #     poetry publish --repository google-acr
+      #
+      - name: Pull main branch and tag
+        poetry run bump-my-version bump patch
+        git pull origin main
+        git config --local user.name "objective-applications-cicd[bot]"
+        git config --local user.email "objective-applications-cicd[bot]@users.noreply.github.com"
+        sed -i "s/^version = .*/version = \"$VERSION\"/" pyproject.toml
+        sed -i "s/^current_version = .*/current_version = \"$VERSION\"/" pyproject.toml
+        git add pyproject.toml
+        git commit -m "Release version: $VERSION"
+        git push origin HEAD
+
