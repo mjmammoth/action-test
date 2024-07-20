@@ -224,34 +224,35 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
+      # - name: Set up Python
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: ${{ matrix.python-version }}
 
-      - name: Install Poetry
-        uses: abatilo/actions-poetry@v2
-        with:
-          poetry-version: ${{ matrix.poetry-version }}
+      # - name: Install Poetry
+      #   uses: abatilo/actions-poetry@v2
+      #   with:
+      #     poetry-version: ${{ matrix.poetry-version }}
 
       - name: Set version to release
         run: |
           VERSION=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')
           poetry version $VERSION
+          echo "would have set version to $VERSION"
 
-      - name: Cache Poetry packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pypoetry
-          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: ${{ runner.os }}-poetry-
-
-      - name: Install non-python dependencies
-        run: sudo apt-get install graphviz graphviz-dev libpq-dev -y
-
-      - name: Install dependencies
-        run: poetry install
-
+      # - name: Cache Poetry packages
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: ~/.cache/pypoetry
+      #     key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+      #     restore-keys: ${{ runner.os }}-poetry-
+      #
+      # - name: Install non-python dependencies
+      #   run: sudo apt-get install graphviz graphviz-dev libpq-dev -y
+      #
+      # - name: Install dependencies
+      #   run: poetry install
+      #
       # - name: Authenticate to GCP
       #   id: google-auth
       #   uses: google-github-actions/auth@v2
