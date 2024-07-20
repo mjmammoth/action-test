@@ -237,6 +237,7 @@ jobs:
         run: |
           git config --local user.name "objective-applications-cicd[bot]"
           git config --local user.email "objective-applications-cicd[bot]@users.noreply.github.com"
+          git checkout main
           git pull origin main
           sed -i "s/^version = .*/version = \"$VERSION\"/" pyproject.toml
           sed -i "s/^current_version = .*/current_version = \"$VERSION\"/" pyproject.toml
