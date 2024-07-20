@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "action-test"
-version = "v0.1.25-rc3"
+version = "v0.1.25-rc4"
 description = ""
 authors = ["Mark Marryatt <awsumtoast@gmail.com>"]
 readme = "README.md"
@@ -16,7 +16,7 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.bumpversion]
-current_version = "v0.1.25-rc3"
+current_version = "v0.1.25-rc4"
 parse = """(?x)
     (?P<major>0|[1-9]\\d*)\\.
     (?P<minor>0|[1-9]\\d*)\\.
