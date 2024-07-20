@@ -244,5 +244,5 @@ jobs:
           sed -i "s/^current_version = .*/current_version = \"$VERSION\"/" pyproject.toml
           git commit -am "Release version: $VERSION"
           poetry run bump-my-version bump patch --no-commit
-          git commit -am "Bump version to next patch"
+          git commit -am "Begin next development iteration"
           git push origin main
