@@ -201,6 +201,10 @@ jobs:
   handle-release-publish:
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ${{ fromJSON(needs.version-matrix.outputs.python-versions) }}
+        poetry-version: ${{ fromJSON(needs.version-matrix.outputs.poetry-versions) }}
     needs:
       - version-matrix
     steps:
