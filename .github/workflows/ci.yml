@@ -242,4 +242,4 @@ jobs:
           sed -i "s/^current_version = .*/current_version = \"$VERSION\"/" pyproject.toml
           poetry run bump-my-version bump patch
           git add pyproject.toml
-          git push origin HEAD
+          git push origin
