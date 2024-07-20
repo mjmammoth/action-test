@@ -223,9 +223,9 @@ jobs:
 
       - name: Set version to release
         run: |
-          VERSION=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')
+          VERSION=${{ github.event.release.tag_name }}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
           poetry version $VERSION
-          echo "would have set version to $VERSION"
 
       # - name: Cache Poetry packages
       #   uses: actions/cache@v4
