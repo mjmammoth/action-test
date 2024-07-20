@@ -261,9 +261,17 @@ jobs:
         run: |
           git config --local user.name "objective-applications-cicd[bot]"
           git config --local user.email "objective-applications-cicd[bot]@users.noreply.github.com"
+          echo one
+          cat pyproject.toml | grep current_version
           git pull origin main
+          echo two
+          cat pyproject.toml | grep current_version
           sed -i "s/^current_version = .*/current_version = \"$VERSION\"/" pyproject.toml
+          echo three
+          cat pyproject.toml | grep current_version
           poetry run bump-my-version bump patch
+          echo four
+          cat pyproject.toml | grep current_version
           git add pyproject.toml
           git commit -m "Release version: $VERSION"
           git push origin HEAD
