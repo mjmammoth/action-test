@@ -129,31 +129,12 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
-      - name: Determine version bump type
-        id: determine_version
-        run: |
-          VERSION_BUMP=patch
-          BASE_COMMIT=$(git merge-base HEAD origin/main)
-          COMMITS=$(git rev-list $BASE_COMMIT..HEAD)
-          for COMMIT in $COMMITS; do
-            COMMIT_MESSAGE=$(git log -1 --pretty=%B $COMMIT)
-            echo "Commit message: $COMMIT_MESSAGE"
-            if echo "$COMMIT_MESSAGE" | grep -q '#major'; then
-              VERSION_BUMP=major
-              break
-            elif echo "$COMMIT_MESSAGE" | grep -q '#minor'; then
-              VERSION_BUMP=minor
-            fi
-          done
-          echo "VERSION_BUMP=$VERSION_BUMP" >> $GITHUB_ENV
-          echo "Determined version bump type: $VERSION_BUMP"
-
       - name: Bump version
         id: bump_version
         run: |
           git config --local user.name "csmark-cicd-bot[bot]"
           git config --local user.email "csmark-cicd-bot[bot]@users.noreply.github.com"
-          poetry run bump-my-version bump ${{ env.VERSION_BUMP }}
+          poetry run bump-my-version bump pre_n
           VERSION=$(poetry version -s)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "Bumped version to $VERSION"
@@ -220,24 +201,26 @@ jobs:
   handle-release-publish:
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
+    needs:
+      - version-matrix
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # - name: Set up Python
-      #   uses: actions/setup-python@v5
-      #   with:
-      #     python-version: ${{ matrix.python-version }}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
 
-      # - name: Install Poetry
-      #   uses: abatilo/actions-poetry@v2
-      #   with:
-      #     poetry-version: ${{ matrix.poetry-version }}
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: ${{ matrix.poetry-version }}
 
       - name: Set version to release
         run: |
           VERSION=$(echo ${{ github.event.release.tag_name }} | sed 's/^v//')
-          # poetry version $VERSION
+          poetry version $VERSION
           echo "would have set version to $VERSION"
 
       # - name: Cache Poetry packages
@@ -250,8 +233,8 @@ jobs:
       # - name: Install non-python dependencies
       #   run: sudo apt-get install graphviz graphviz-dev libpq-dev -y
       #
-      # - name: Install dependencies
-      #   run: poetry install
+      - name: Install dependencies
+        run: poetry install
       #
       # - name: Authenticate to GCP
       #   id: google-auth
@@ -272,12 +255,11 @@ jobs:
       #
       - name: Pull main branch and tag
         run: |
-          # poetry run bump-my-version bump patch
-          git pull origin main
           git config --local user.name "objective-applications-cicd[bot]"
           git config --local user.email "objective-applications-cicd[bot]@users.noreply.github.com"
-          sed -i "s/^version = .*/version = \"$VERSION\"/" pyproject.toml
+          git pull origin main
           sed -i "s/^current_version = .*/current_version = \"$VERSION\"/" pyproject.toml
+          poetry run bump-my-version bump patch
           git add pyproject.toml
           git commit -m "Release version: $VERSION"
           git push origin HEAD

@@ -1,6 +1,10 @@
 [tool.poetry]
 name = "action-test"
+<<<<<<< Updated upstream
 version = "v0.1.25-dev"
+=======
+version = "v0.1.24-rc0"
+>>>>>>> Stashed changes
 description = ""
 authors = ["Mark Marryatt <awsumtoast@gmail.com>"]
 readme = "README.md"
@@ -16,7 +20,11 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.bumpversion]
+<<<<<<< Updated upstream
 current_version = "v0.1.25-dev"
+=======
+current_version = "v0.1.24-rc0"
+>>>>>>> Stashed changes
 parse = """(?x)
     (?P<major>0|[1-9]\\d*)\\.
     (?P<minor>0|[1-9]\\d*)\\.
@@ -24,10 +32,11 @@ parse = """(?x)
     (?:
         -                             # dash separator for pre-release section
         (?P<pre_l>[a-zA-Z-]+)         # pre-release label
+        (?P<pre_n>0|[1-9]\\d*)        # pre-release version number
     )?                                # pre-release section is optional
 """
 serialize = [
-    "v{major}.{minor}.{patch}-{pre_l}",
+    "v{major}.{minor}.{patch}-{pre_l}{pre_n}",
     "v{major}.{minor}.{patch}"
 ]
 search = "{current_version}"
@@ -44,7 +53,7 @@ message = "Bump version: {new_version}"
 commit_args = ""
 
 [tool.bumpversion.parts.pre_l]
-values = ["dev", "final"]
+values = ["rc", "final"]
 optional_value = "final"
 
 [[tool.bumpversion.files]]
