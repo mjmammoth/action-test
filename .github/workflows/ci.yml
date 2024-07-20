@@ -235,14 +235,14 @@ jobs:
 
       - name: Pull main branch and tag
         run: |
-          git config --local user.name "objective-applications-cicd[bot]"
-          git config --local user.email "objective-applications-cicd[bot]@users.noreply.github.com"
+          git config --local user.name "csmark-cicd-bot[bot]"
+          git config --local user.email "csmark-cicd-bot[bot]@users.noreply.github.com"
           git fetch origin
           git checkout -f main
           git pull origin main
           sed -i "s/^version = .*/version = \"$VERSION\"/" pyproject.toml
           sed -i "s/^current_version = .*/current_version = \"$VERSION\"/" pyproject.toml
+          git commit -am "Release version: $VERSION"
           poetry run bump-my-version bump patch --no-commit
-          git add pyproject.toml
-          git commit -m "Release version: $VERSION"
+          git commit -am "Bump version to next patch"
           git push origin main
