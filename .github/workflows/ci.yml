@@ -201,6 +201,9 @@ jobs:
   handle-release-publish:
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
+    permissions:
+      contents: 'write'
+      id-token: 'write'
     strategy:
       matrix:
         python-version: ${{ fromJSON(needs.version-matrix.outputs.python-versions) }}
